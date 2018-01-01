@@ -80,9 +80,41 @@ person1 和 person2 分别保存着Person的一个不同的实例。这两个对
     person2.sayName(); // 'niuniu'
     person1.sayName === person2.sayName // true
 ```
-> 无论什么时候，只要创建了一个新函数，就会根据一组特定的规则为该函数常见一个 prototype 属性，这个属性指向函数的原型对象。在默认情况下，所有原型对象都会自动获得一个 constructor 属性，这个属性包含一个指向 prototype 属性所在函数的指针。通过这个构造函数，我们还可以为原型对象添加其他属性和方法。
+> 无论什么时候，只要创建了一个新函数，就会根据一组特定的规则为该函数常见一个 prototype 属性，这个属性指向函数的原型对象。在默认情况下，所有原型对象都会自动获得一个 constructor 属性，这个属性包含一个指向 prototype 属性所在函数的指针。通过这个构造函数，我们还可以为原型对象添加其他属性和方法。   <hr>
+创建了自定义的构造函数之后，其原型对象只会取得 constructor 属性；至于其他方法，则都是从Object继承而来的。  <hr>
+当调用构造函数创建一个新实例后，该实例的内部将包含一个指针，指向构造函数的原型对象；  
+***这个连接存在于实例与构造函数的原型对象之间，而不是实例与构造函数之间***
+
+<img src="./images/createObject-prototype.png" width="600"/>
+
+> isPrototypeOf() 方法来确定对象之间是否存在这种关系
+```javascript
+    Person.prototype.isPrototypeOf(person1) // true
+    Person.prototype.isPrototypeOf(person2) // true
+```
+> getPrototypeOf() 返回 __proto__ 的值
+
+```javascript
+    Object.getPrototypeOf(person1) === Person.prototype // true
+```
+<img src="./images/createObject-prototype2.png" width="600"/>
 
 4. 组合使用构造函数模式和原型模式
+> 结合构造函数和原型模式的有点  
+构造函数可以传值   
+原型可以定义公共方法
+```javascript
+    function Person(name, age, job) {
+        this.name = name;
+        this.age = age;
+        this.job = job;
+    }
+    Person.prototype.sayName = function() {
+        console.log(this.name)
+    }
+```
 5. 动态原型模式
 6. 寄生构造函数模式
 7. 稳妥构造函数模式
+
+## 继承
