@@ -118,3 +118,23 @@ person1 和 person2 分别保存着Person的一个不同的实例。这两个对
 7. 稳妥构造函数模式
 
 ## 继承
+> oo语言有两种继承方式：接口继承(只继承方法签名)、实现继承(继承实际的方法)
+
+1. 原型链：利用原型让一个引用类型继承另一个引用类型的属性和方法
+```javascript
+function SuperType () {
+    this.property = true;
+}
+SuperType.prototype.getSuperValue = function () {
+    return this.property;
+}
+function SubType() {
+    this.subProperty = false;
+}
+SubType.prototype = new SuperType()
+SubType.prototype.getSubValue = function () {
+    return this.subProperty;
+}
+var instance = new SubType()
+```
+<img src="./images/extends-prototype.png" width="600"/>
