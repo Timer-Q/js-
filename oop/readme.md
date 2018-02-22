@@ -216,3 +216,78 @@ instance.getSuperValue() 的返回值为true，是因为 SubType.prototype 是 S
 > 注： 由于 SubType.prototype 是 SuperType 的实例，故 SubType.prototype 中存在实例属性 name、colors   
 instaceof isPrototypeOf() 也能用于基于组合继承的对象
 
+4. 原型式继承
+原型式继承有个典型代表：Object.create()
+
+虽然不知道具体逻辑的实现，简单原理如下：
+```javascript
+    function object(o) {
+        function F() {}
+        F.prototype = o
+        return new F()
+    }
+```
+Object.create() 接收连个参数，如果只传一个的话，就如上面所写那样；   
+第二个参数与 Object.definedProperties() 方法的第二个参数相似，每个属性都是通过自己的描述定义的，
+以这种方式定义的任何属性，都会覆盖原型上的同名属性
+
+```javascript
+    var person = {
+        name: 'niuniu',
+        friends: ['huahua']
+    }
+    var anotherPerson = Object.create(person, {
+        name: 'Tony'
+    })
+    console.log(anotherPersin.name) // Tony
+```
+
+5. 寄生式继承
+类似工厂模式
+```javascript
+    function createAnother(original) {
+        var clone = object(original)
+        clone.sayHi = function() {
+            console.log('hi')
+        }
+        return clone
+    }
+    var person = {
+        name: 'niuniu',
+        friends: ['huahua']
+    }
+    var anotherPerson = createAnother(person)
+    anotherPerson.sayHi() // => hi
+```
+6. 寄生组合式继承
+
+组合继承最大的问题：无论在什么情况下，都会调用两次超类构造函数；一次是在创建子类型实例的时候，一次是在子类型构造函数中。   
+第一次调用的时候，会在 SubType.prototype 上创建多余的实例属性。   
+
+为了提高效率，解决以上问题，故而使用寄生组合式继承。   
+
+寄生组合式继承主要思想：
+> 使用寄生的方式，使 Subtype.prototype 与 SuperType.prototype 产生继承关系，然后利用组合继承的方式，继承属性。
+```javascript
+    function inheritPrototype(subType, superType) {
+        // var prototype = object(superType.prototype)
+        var prototype = Object.create(superType.prototype) // 创建对象
+        prototype.constructor = subType // 增强对象
+        subType.prototype = prototype // 指定对象
+    }
+    function SuperType(name){
+        this.name = name;
+        this.colors = ["red", "blue", "green"];
+    }
+    SuperType.prototype.sayName = function(){
+        alert(this.name);
+    };
+    function SubType(name, age){
+        SuperType.call(this, name);
+        this.age = age;
+    }
+    inheritPrototype(SubType, SuperType);
+    SubType.prototype.sayAge = function(){
+        alert(this.age);
+    };
+```
