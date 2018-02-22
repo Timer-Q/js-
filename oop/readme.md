@@ -21,7 +21,7 @@
         this.age = age;
         this.job = job;
         this.sayName = function() {
-            console.log(this.name;)
+            console.log(this.name);
         };
     }
     const persion1 = new Person('niuniu', 18, 'developer')
@@ -39,7 +39,9 @@ person1 和 person2 分别保存着Person的一个不同的实例。这两个对
     person2.constructor === Person // true
 ```
 > 通过 instanceof 可以知道，创建的实例既是 Object 的实例，也是 Person 的实例；   
-创建自定义个构造函数意味着将来可以将它的实例标识为一种特定的类型；***而这正是构造函数胜过工厂模式的地方***   
+创建自定义个构造函数意味着将来可以将它的实例标识为一种特定的类型；
+
+***   
 
 > 缺点：   
 每个方法都要在每个实例上重新创建一遍，例如 sayName()
@@ -80,8 +82,10 @@ person1 和 person2 分别保存着Person的一个不同的实例。这两个对
     person2.sayName(); // 'niuniu'
     person1.sayName === person2.sayName // true
 ```
-> 无论什么时候，只要创建了一个新函数，就会根据一组特定的规则为该函数常见一个 prototype 属性，这个属性指向函数的原型对象。在默认情况下，所有原型对象都会自动获得一个 constructor 属性，这个属性包含一个指向 prototype 属性所在函数的指针。通过这个构造函数，我们还可以为原型对象添加其他属性和方法。   <hr>
-创建了自定义的构造函数之后，其原型对象只会取得 constructor 属性；至于其他方法，则都是从Object继承而来的。  <hr>
+> 无论什么时候，只要创建了一个新函数，就会根据一组特定的规则为该函数常见一个 prototype 属性，这个属性指向函数的原型对象。在默认情况下，所有原型对象都会自动获得一个 constructor 属性，这个属性包含一个指向 prototype 属性所在函数的指针。通过这个构造函数，我们还可以为原型对象添加其他属性和方法。   
+***
+创建了自定义的构造函数之后，其原型对象只会取得 constructor 属性；至于其他方法，则都是从Object继承而来的。  
+***
 当调用构造函数创建一个新实例后，该实例的内部将包含一个指针，指向构造函数的原型对象；  
 ***这个连接存在于实例与构造函数的原型对象之间，而不是实例与构造函数之间***
 
@@ -136,5 +140,79 @@ SubType.prototype.getSubValue = function () {
     return this.subProperty;
 }
 var instance = new SubType()
+instance.getSuperValue() // true
 ```
 <img src="./images/extends-prototype.png" width="600"/>
+
+> 此处有个地方需要注意：
+instance.getSuperValue() 的返回值为true，是因为 SubType.prototype 是 SuperType 的实例，SubType.prototype 上也就有了 property 这个实例属性，然后 instance 调用 getSuperValue 方法的时候，发现 instance 上没有 property 这个属性，然后沿着原型链往上找，在 SubType.prototype 上找到了。  
+
+> 原型链继承无法避免的问题:   
+如果原型上有引用类型，那么其对应的所有实例将共享该引用类型，其中一个实例改变了该值，其他实例取到的值也将发生变化。   
+构建子类实例的时候，不能向超类构造函数中传值；实际上，应该说是没有办法在不影响所有对象实例的情况下，给超类的构造函数传递参数
+
+2. 借用构造函数
+> 在子类型构造函数中调用超类型构造函数
+```javascript
+    function SuperType() {
+        this.colors = ['red', 'green', 'blue'];
+    }
+    function SubType() {
+        SuperType.call(this);
+    }
+    var instance1 = new SubType()
+    instance1.colors.push('black')
+    console.log(instance1.colors) // red, green, blue, black
+    var instance2 = new SubType()
+    console.log(instance2.colors) // red, green, blue
+```
+优势：
+传递参数
+相对于原型链而言，借用构造函数的一大优点是可以在子类型构造函数中向超类构造函数中传参。
+```javascript
+    function SuperType(name) {
+        this.name = name
+    }
+    function SubType(name, age) {
+        SuperType.call(this, name)
+        this.age = age
+    }
+    var instance = new SubType('niuniu', 18)
+    console.log(instance.name, instance.age) // => niuniu 18
+```
+劣势：
+公共方法无法实现继承
+
+3. 组合式继承（伪经典继承）
+原型链实现对原型属性和方法的继承，构造函数实现实例属性的继承。这样，即通过在原型上定义方法，实现了方法复用，又能保证每个实例有自己的属性
+```javascript
+    function SuperType(name) {
+        this.name = name
+        this.colors = ['red', 'green', 'blue']
+    }
+    SuperType.prototype.sayName = function() {
+        console.log(this.name || 'you do not have name')
+    }
+    function SubType(name, age) {
+        SuperType.call(this, name)
+        this.age = age
+    }
+    SubType.prototype = new SuperType()
+    SubType.prototype.constructor = SubType
+    SubType.prototype.sayAge = function() {
+        console.log(this.age)
+    }
+    var instance1 = new SubType('niuniu', 18)
+    instance1.colors.push('black')
+    instance1.sayName()
+    instance1.sayAge()
+    console.log(instance1.colors)
+
+    var instance2 = new SubType('huahua', 17)
+    instance2.sayName()
+    instance2.sayAge()
+    console.log(instance2.colors)
+```
+> 注： 由于 SubType.prototype 是 SuperType 的实例，故 SubType.prototype 中存在实例属性 name、colors   
+instaceof isPrototypeOf() 也能用于基于组合继承的对象
+
