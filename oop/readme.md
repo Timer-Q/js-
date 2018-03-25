@@ -227,7 +227,7 @@ instaceof isPrototypeOf() 也能用于基于组合继承的对象
         return new F()
     }
 ```
-Object.create() 接收连个参数，如果只传一个的话，就如上面所写那样；   
+Object.create() 接收两个参数，如果只传一个的话，就如上面所写那样；   
 第二个参数与 Object.definedProperties() 方法的第二个参数相似，每个属性都是通过自己的描述定义的，
 以这种方式定义的任何属性，都会覆盖原型上的同名属性
 
@@ -237,9 +237,11 @@ Object.create() 接收连个参数，如果只传一个的话，就如上面所�
         friends: ['huahua']
     }
     var anotherPerson = Object.create(person, {
-        name: 'Tony'
+        name: {
+            value: 'Tony' // 该值是挂在在anotherPerson下面
+        }
     })
-    console.log(anotherPersin.name) // Tony
+    console.log(anotherPerson.name) // Tony
 ```
 
 5. 寄生式继承
